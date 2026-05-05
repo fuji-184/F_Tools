@@ -51,3 +51,15 @@ mod notif;
 pub use notif::*;
 
 pub mod sharded;
+
+mod circuit_breaker;
+pub use circuit_breaker::*;
+
+mod event_bus;
+pub use event_bus::*;
+
+#[cfg(feature = "async_cross_thread")]
+mod async_task_pool;
+
+#[cfg(feature = "async_cross_thread")]
+pub use async_task_pool::*;
