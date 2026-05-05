@@ -2,20 +2,14 @@ use std::collections::HashMap;
 use std::hash::Hash;
 use std::future::Future;
 use std::sync::Arc;
-
-#[cfg(feature = "async_cross_thread")]
 use tokio::sync::Mutex;
 
-
-#[cfg(feature = "async_cross_thread")]
 pub struct AsyncMemoize<T, U, F> {
     logic: F,
     cache: Arc<Mutex<HashMap<T, U>>>,
     max_size: usize,
 }
 
-
-#[cfg(feature = "async_cross_thread")]
 impl<T, U, F, Fut> AsyncMemoize<T, U, F>
 where
     T: Hash + Eq + Clone + Send + 'static,

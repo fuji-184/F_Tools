@@ -2,20 +2,14 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 use std::sync::Arc;
-
-#[cfg(feature = "async_cross_thread")]
 use tokio::sync::RwLock;
-
-#[cfg(feature = "async_cross_thread")]
 use tokio::fs;
 
-#[cfg(feature = "async_cross_thread")]
 pub struct AsyncFileMemoize<U> {
     cache: Arc<RwLock<HashMap<PathBuf, (SystemTime, U)>>>,
     max_size: usize,
 }
 
-#[cfg(feature = "async_cross_thread")]
 impl<U: Clone + Send + Sync + 'static> AsyncFileMemoize<U> {
     pub fn new(max_size: usize) -> Self {
         Self {

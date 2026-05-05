@@ -1,3 +1,5 @@
+use ftool::*;
+
 fn main() {
   
 }
