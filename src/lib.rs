@@ -78,3 +78,6 @@ pub use bit_packer::*;
 
 mod delta_sync;
 pub use delta_sync::*;
+
+mod bit_mask_permissions;
+pub use bit_mask_permissions::*;
