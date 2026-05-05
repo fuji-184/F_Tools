@@ -7,6 +7,19 @@ impl PermissionMask {
     }
 
     #[inline]
+    pub fn grant_many(mut mask: u64, perms: &[u64]) -> u64 {
+        for p in perms {
+            mask |= p;
+        }
+        mask
+    }
+    
+    #[inline]
+    pub fn toggle(mask: u64, permission: u64) -> u64 {
+        mask ^ permission
+    }
+
+    #[inline]
     pub fn revoke(mask: u64, permission: u64) -> u64 {
         mask & !permission
     }
