@@ -1,7 +1,7 @@
 use std::time::{Duration, Instant};
 
 pub struct CronJob<'a> {
-    pub name: &'static str,
+    pub name: &'a str,
     pub interval: Duration,
     pub last_run: Instant,
     pub action: Box<dyn FnMut() -> Result<(), String> + 'a>,
@@ -18,7 +18,7 @@ impl<'a> CronScheduler<'a> {
         Self { jobs: Vec::new() }
     }
 
-    pub fn add_job<F>(&mut self, name: &'static str, interval: Duration, action: F)
+    pub fn add_job<F>(&mut self, name: &'a str, interval: Duration, action: F)
     where
         F: FnMut() -> Result<(), String> + 'a
     {
