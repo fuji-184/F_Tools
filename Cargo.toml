@@ -4,9 +4,11 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+libc = { version = "0.2.186", optional = true }
 tokio = { version = "*", features = ["sync", "time", "fs", "rt", "macros", "signal"], optional = true }
 tokio-util = { version = "0.7.18", optional = true }
 
 [features]
 default = []
 async_cross_thread = ["dep:tokio", "dep:tokio-util"]
+libc = ["dep:libc"]

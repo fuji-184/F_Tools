@@ -22,6 +22,7 @@ dependencies = [
 name = "ftool"
 version = "0.1.0"
 dependencies = [
+ "libc",
  "tokio",
  "tokio-util",
 ]

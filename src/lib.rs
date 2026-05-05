@@ -87,3 +87,21 @@ pub use cronjob::*;
 
 mod state_event_action;
 pub use state_event_action::*;
+
+#[cfg(feature = "libc")]
+mod memmap;
+
+#[cfg(feature = "libc")]
+pub use memmap::*;
+
+mod wait_group;
+pub use wait_group::*;
+
+#[cfg(feature = "libc")]
+mod futex_wait;
+
+#[cfg(feature = "libc")]
+pub use futex_wait::*;
+
+mod cycle_counter;
+pub use cycle_counter::*;
