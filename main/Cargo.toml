@@ -4,4 +4,5 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-ftool = { path = "../" }
+ftool = { path = "../", features = ["async_cross_thread"] }
+tokio = { version = "1.52.2", features = ["sync", "time"] }

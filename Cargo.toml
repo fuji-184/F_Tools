@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-tokio = { version = "*", features = ["sync"], optional = true }
+tokio = { version = "*", features = ["sync", "time", "fs", "rt", "macros", "signal"], optional = true }
 
 [features]
 default = []
