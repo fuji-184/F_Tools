@@ -18,4 +18,15 @@ fn main() {
         print!("{v} ");
     }
     });
+    
+    ftool::thread_local_memo!(SQUARE_CACHE, 10, |x: i32| {
+        println!("Calculating square for {}...", x);
+        x * x
+    }, i32, i32);
+
+    // Cara panggil
+    let res1 = SQUARE_CACHE.with(|m| m.borrow_mut().call(5));
+    let res2 = SQUARE_CACHE.with(|m| m.borrow_mut().call(5)); // Langsung return
+
+    println!("Res 1: {}, Res 2: {}", res1, res2);
 }
