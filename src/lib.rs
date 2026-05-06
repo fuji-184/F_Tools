@@ -115,3 +115,14 @@ pub use zero_copy::*;
 mod simd_copy;
 pub use simd_copy::*;
 
+#[cfg(feature = "libc")]
+mod thread_affinity;
+
+#[cfg(feature = "libc")]
+pub use thread_affinity::*;
+
+#[cfg(feature = "libc")]
+mod inter_process_memory;
+
+#[cfg(feature = "libc")]
+pub use inter_process_memory::*;
