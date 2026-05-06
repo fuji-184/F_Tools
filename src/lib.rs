@@ -126,3 +126,9 @@ mod inter_process_memory;
 
 #[cfg(feature = "libc")]
 pub use inter_process_memory::*;
+
+#[cfg(feature = "libc")]
+mod futex_thread_pause;
+
+#[cfg(feature = "libc")]
+pub use futex_thread_pause::*;

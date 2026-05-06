@@ -1,24 +1,33 @@
 
 use ftool::*;
 
+use std::thread;
+use std::sync::Arc;
+use std::time::Duration;
+
 fn main() {
-    let wg = FutexWaitGroup::new();
-    
-    wg.add(4);
+
+    let barrier = Arc::new(FutexThreadPause::new(4));
+    let mut handles = Vec::new();
 
     for i in 0..4 {
-        let wg_clone = wg.clone();
-        std::thread::spawn(move || {
-            println!("Worker {} mulai bekerja...", i);
+        let b = Arc::clone(&barrier);
+        handles.push(thread::spawn(move || {
+            println!("Thread {} sedang melakukan inisialisasi...", i);
             
-            std::thread::sleep(std::time::Duration::from_secs(1));
+            thread::sleep(Duration::from_millis(i * 100)); 
+
+            println!("Thread {} mencapai titik tunggu (Barrier)", i);
             
-            println!("Worker {} selesai", i);
-            wg_clone.done(); 
-        });
+            b.wait();
+
+            println!("Thread {} lepas dari barrier dan mulai memproses data", i);
+        }));
     }
 
-    println!("Menunggu semua worker...");
-    wg.wait();
-    println!("Semua tugas beres. Lanjut");
+    for handle in handles {
+        handle.join().unwrap();
+    }
+    
+    println!("Semua tugas selesai");
 }
