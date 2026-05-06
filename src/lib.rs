@@ -105,3 +105,13 @@ pub use futex_wait::*;
 
 mod cycle_counter;
 pub use cycle_counter::*;
+
+#[cfg(feature = "libc")]
+mod zero_copy;
+
+#[cfg(feature = "libc")]
+pub use zero_copy::*;
+
+mod simd_copy;
+pub use simd_copy::*;
+
