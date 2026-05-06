@@ -132,3 +132,6 @@ mod futex_thread_pause;
 
 #[cfg(feature = "libc")]
 pub use futex_thread_pause::*;
+
+mod bit_set;
+pub use bit_set::*;
