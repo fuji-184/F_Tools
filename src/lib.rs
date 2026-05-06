@@ -135,3 +135,9 @@ pub use futex_thread_pause::*;
 
 mod bit_set;
 pub use bit_set::*;
+
+#[cfg(feature = "libc")]
+mod numa_memory_bind;
+
+#[cfg(feature = "libc")]
+pub use numa_memory_bind::*;
