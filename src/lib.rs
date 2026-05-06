@@ -141,3 +141,9 @@ mod numa_memory_bind;
 
 #[cfg(feature = "libc")]
 pub use numa_memory_bind::*;
+
+mod relative_pointer;
+pub use relative_pointer::*;
+
+mod persistent_vmm;
+pub use persistent_vmm::*;

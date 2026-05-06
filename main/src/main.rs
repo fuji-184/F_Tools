@@ -1,33 +1,23 @@
 
 use ftool::*;
 
-use std::thread;
-use std::sync::Arc;
-use std::time::Duration;
+use std::sync::atomic::Ordering;
+use std::sync::atomic::AtomicU64;
+
+struct AppState {
+    counter: AtomicU64,
+    last_updated: u64,
+}
 
 fn main() {
-
-    let barrier = Arc::new(FutexThreadPause::new(4));
-    let mut handles = Vec::new();
-
-    for i in 0..4 {
-        let b = Arc::clone(&barrier);
-        handles.push(thread::spawn(move || {
-            println!("Thread {} sedang melakukan inisialisasi...", i);
-            
-            thread::sleep(Duration::from_millis(i * 100)); 
-
-            println!("Thread {} mencapai titik tunggu (Barrier)", i);
-            
-            b.wait();
-
-            println!("Thread {} lepas dari barrier dan mulai memproses data", i);
-        }));
-    }
-
-    for handle in handles {
-        handle.join().unwrap();
-    }
+    let mmap = MemMap::open("config.txt", true, Some(1024 * 1024)).unwrap();
     
-    println!("Semua tugas selesai");
+    let vmm = PersistentVmm::new(mmap);
+
+    let state: *mut AppState = vmm.get_root_mut_ref();
+
+    unsafe {
+        (*state).counter.fetch_add(1, Ordering::SeqCst);
+        println!("Counter saat ini: {}", (*state).counter.load(Ordering::Relaxed));
+    }
 }

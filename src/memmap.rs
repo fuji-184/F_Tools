@@ -5,16 +5,23 @@ use std::slice;
 use std::marker::PhantomData;
 
 pub struct MemMap {
-    ptr: *mut u8,
-    len: usize,
+    pub ptr: *mut u8,
+    pub len: usize,
 }
 
 impl MemMap {
-    pub fn open<P: AsRef<std::path::Path>>(path: P, writable: bool) -> std::io::Result<Self> {
+    pub fn open<P: AsRef<std::path::Path>>(path: P, writable: bool, size: Option<usize>) -> std::io::Result<Self> {
         let file = OpenOptions::new()
             .read(true)
             .write(writable)
+            .create(writable && size.is_some())
             .open(path)?;
+            
+        if let Some(s) = size {
+            if writable {
+                file.set_len(s as u64)?;
+            }
+        }
         
         let len = file.metadata()?.len() as usize;
         if len == 0 {
@@ -68,6 +75,14 @@ impl MemMap {
     pub fn flush(&self) -> std::io::Result<()> {
         let res = unsafe { libc::msync(self.ptr as *mut libc::c_void, self.len, libc::MS_SYNC) };
         if res == 0 { Ok(()) } else { Err(std::io::Error::last_os_error()) }
+    }
+    
+    pub fn as_mut_ptr(&self) -> *mut u8 {
+        self.ptr
+    }
+
+    pub fn len(&self) -> usize {
+        self.len
     }
 }
 
