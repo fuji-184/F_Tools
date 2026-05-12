@@ -8,6 +8,7 @@ libc = { version = "0.2.186", optional = true }
 tokio = { version = "*", features = ["sync", "time", "fs", "rt", "macros", "signal"], optional = true }
 tokio-util = { version = "0.7.18", optional = true }
 futures = "*"
+paste = "*"
 
 [features]
 default = []

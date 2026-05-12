@@ -1,3 +1,6 @@
+
+pub use paste;
+
 pub mod bench;
 pub mod debug_print;
 pub mod defer;
@@ -156,3 +159,6 @@ pub use local_async_scope::*;
 
 mod global_async_scope;
 pub use global_async_scope::*;
+
+mod self_reference;
+pub use self_reference::*;

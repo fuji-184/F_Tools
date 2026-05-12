@@ -1,20 +1,43 @@
 
 use ftool::*;
 
-#[tokio::main]
-async fn main() {
-    let mut counter = 0;
-    let data = vec![1, 2, 3];
+self_ref! {
+    #[derive(Debug)]
+    pub struct MyData {
+        pub a: String,
+        pub b: Vec<i32>,
+        pub c: i32,
+        => 
+        #[derive(Debug)]
+        {
+            pub text: &'a str,
+            pub numbers: &'a [i32],
+        }
+    }
+}
 
-    local_async_scope(|s| {
-        s.spawn(async {
-            println!("Thread {:?}, data: {:?}", std::thread::current().id(), data);
-        });
+fn main() {
 
-        s.spawn(async {
-            println!("Thread {:?}, data len: {}", std::thread::current().id(), data.len());
-        });
-        counter += 10;
-    }).await;
+    let mut sref = declare_self_ref! {
+
+        MyData {
+
+            a: String::from("Rust"),
+
+            b: vec![1, 2, 3],
+
+            c: 42,
+
+            => { text: &a, numbers: &b }
+
+        }
+
+    };
+    
+    update_self_ref_field!(sref, a => [text: &str], String::from("New String that reallocs"));
+
+    
+
+    println!("{:?}", sref);
 
 }
