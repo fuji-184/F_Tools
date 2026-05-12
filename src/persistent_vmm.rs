@@ -12,7 +12,7 @@ pub struct VmmHeader {
 }
 
 pub struct PersistentVmm {
-    memmap: MemMap,
+    pub memmap: MemMap,
     current_offset: AtomicUsize,
 }
 

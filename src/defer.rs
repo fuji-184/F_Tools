@@ -24,3 +24,4 @@ macro_rules! defer {
         let _defer = crate::defer::Defer::new(|| { $($body)* });
     };
 }
+

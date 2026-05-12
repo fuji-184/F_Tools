@@ -147,3 +147,12 @@ pub use relative_pointer::*;
 
 mod persistent_vmm;
 pub use persistent_vmm::*;
+
+mod simd_scanner;
+pub use simd_scanner::*;
+
+mod local_async_scope;
+pub use local_async_scope::*;
+
+mod global_async_scope;
+pub use global_async_scope::*;
