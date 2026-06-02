@@ -146,3 +146,27 @@ ftest::test!(simd_copy_tests, {
         assert_eq!(dst[119], 0);
     }
 });
+
+ftest::bench!(simd_copy_comparison, {
+    const SIZE: usize = 8024;
+
+    std_lib_copy {
+        let src = vec![0u8; SIZE];
+        let mut dst = vec![0u8; SIZE];
+        test::black_box(&src);
+        test::black_box(&mut dst);
+    } -> {
+        dst.copy_from_slice(&src);
+    }
+
+    simd_manual_copy {
+        let src = vec![0u8; SIZE];
+        let mut dst = vec![0u8; SIZE];
+        test::black_box(&src);
+        test::black_box(&mut dst);
+    } -> {
+        unsafe {
+            SimdCopy::copy(src.as_ptr(), dst.as_mut_ptr(), SIZE);
+        }
+    }
+});

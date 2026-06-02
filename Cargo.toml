@@ -9,7 +9,7 @@ tokio = { version = "*", features = ["sync", "time", "fs", "rt", "macros", "sign
 tokio-util = { version = "0.7.18", optional = true }
 futures = "*"
 paste = "*"
-ftest = { git = "https://github.com/fuji-184/FTest.git", features = ["tokio"] }
+ftest = { git = "https://github.com/fuji-184/FTest.git", features = ["tokio", "bench"] }
 
 #ftest = { path = "./FTest", features = ["tokio"] }
 

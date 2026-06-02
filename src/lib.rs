@@ -1,4 +1,6 @@
 
+#![feature(test)]
+
 pub use paste;
 
 pub mod bench;

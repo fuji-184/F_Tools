@@ -152,3 +152,22 @@ ftest::test!(simd_scanner_tests, {
         assert_eq!(result, Some(10));
     }
 });
+
+ftest::bench!(simd_scanner_comparison, {
+    const SIZE: usize = 1024;
+    const NEEDLE: u8 = 42;
+
+    std_lib_find {
+        let haystack = vec![0u8; SIZE];
+        test::black_box(&haystack);
+    } -> {
+        haystack.iter().position(|&b| b == NEEDLE)
+    }
+
+    simd_scanner_find {
+        let haystack = vec![0u8; SIZE];
+        test::black_box(&haystack);
+    } -> {
+        SimdScanner::find_byte(&haystack, NEEDLE)
+    }
+});
