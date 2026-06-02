@@ -1,3 +1,14 @@
+
+/*
+High-performance file I/O framework for zero-copy data parsing and storage persistence.
+
+This mechanism maps storage files directly into the process's virtual memory layout and overlays 
+structured types safely across the resulting byte streams. It is primarily used to optimize heavy 
+disk operations—such as reading large database index files, updating persistence logs, or parsing 
+binary payload records—by treating file contents as a raw memory slice and mapping structured 
+C-compatible data types onto them without executing heap allocations or runtime copy overhead.
+*/
+
 use std::fs::OpenOptions;
 use std::os::unix::io::AsRawFd;
 use std::ptr;

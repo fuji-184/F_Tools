@@ -1,3 +1,16 @@
+
+/*
+High-bandwidth SIMD memory copy utility for optimizing bulk data movement.
+
+This structure leverages CPU vector registers to perform wide memory copies, transferring 
+multiple bytes per instruction cycle (16, 32, or 64 bytes at a time depending on supported 
+architecture extensions like AVX-512, AVX2, or NEON). It is primarily used to bypass 
+the overhead of standard library byte-copy routines in performance-critical scenarios—such 
+as rapid serialization of network packets, high-speed buffer shifting in circular queues, 
+or frequent memory snapshotting—by maximizing the utilized memory bandwidth and instruction-level 
+parallelism.
+*/
+
 use std::ptr;
 
 pub struct SimdCopy;

@@ -1,3 +1,13 @@
+
+/*
+Asynchronous graceful shutdown coordinator for cross-platform applications.
+
+This function intercepts system termination signals (such as Ctrl+C/SIGINT on all platforms 
+and SIGTERM on Unix-like environments). Upon interception, it pauses execution to run a 
+provided asynchronous cleanup closure, ensuring that external connections, background tasks, 
+or disk resources are released predictably before the application completely exits.
+*/
+
 use std::future::Future;
 
 pub async fn async_gracefull_shutdown<F, Fut>(cleanup_logic: F)

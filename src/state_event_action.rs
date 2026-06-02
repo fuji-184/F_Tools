@@ -1,3 +1,15 @@
+
+/*
+Finite State Machine (FSM) implementation to enforce valid state transitions and predictable application behavior.
+
+This mechanism acts as a formal model to manage system logic, ensuring an application moves 
+only through defined, valid paths in response to specific events. It is primarily used to 
+simplify complex control flows—such as orchestrating connection lifecycles, managing UI navigation 
+states, or governing order-processing workflows—by decoupling the transition rules from the 
+business logic, thereby eliminating invalid state sequences and making system behavior strictly 
+deterministic.
+*/
+
 use std::marker::PhantomData;
 
 pub struct StateEventAction<S, E> {

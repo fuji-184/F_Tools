@@ -1,5 +1,16 @@
 use futures::stream::FuturesUnordered;
 use futures::StreamExt;
+
+/*
+Local structured concurrency scope for driving multiple concurrent operations to completion.
+
+This utility groups related asynchronous tasks and guarantees that none of them outlive the 
+enclosing scope block. It is primarily used to bundle and track dependent sub-operations—such 
+as fanning out multiple web requests, parallelizing independent data parsing jobs, or executing 
+batch background operations—ensuring that control only returns to the caller once every 
+spawned task has successfully finished executing.
+*/
+
 use std::future::Future;
 
 pub async fn local_async_scope<'a, F, T>(f: F) 

@@ -1,3 +1,14 @@
+
+/*
+Structured concurrency manager to safely supervise and lifecycle-bind background tasks.
+
+This abstraction enables spawning concurrent background jobs that can safely borrow or reference 
+data from the surrounding block environment. It is primarily used to enforce clean task lifecycles—
+such as processing transient batch computations, handling multi-step request operations, or 
+orchestrating short-lived sub-tasks—by ensuring all spawned operations either complete or get 
+automatically aborted before execution exits the defined scope block, eliminating orphan tasks.
+*/
+
 use std::future::Future;
 use std::marker::PhantomData;
 use std::pin::Pin;

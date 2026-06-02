@@ -1,3 +1,16 @@
+
+/*
+High-precision CPU cycle counter for benchmarking and performance profiling.
+
+This utility leverages hardware-native instructions (such as `rdtscp` on x86_64 or `cntvct_el0` 
+on aarch64) to capture the exact cycle count of a processor core with minimal overhead. It 
+is primarily used for ultra-low latency instrumentation—such as measuring function execution 
+time in trading systems, tracking cache-miss costs, or profiling hot-path algorithmic 
+optimizations—by providing nanosecond-scale granularity and core-affinity awareness to 
+ensure that measurements remain accurate even in highly concurrent, preemptive execution 
+environments.
+*/
+
 pub struct CycleResult {
     pub cycles: u64,
     pub core_id: u32,

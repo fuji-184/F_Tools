@@ -1,3 +1,14 @@
+
+/*
+Position-independent reference utility for cross-process and memory-mapped data structures.
+
+This structure replaces raw absolute hardware memory addresses with a relative byte offset 
+calculated from a shared anchor location. It is primarily used to build serializable, graph-like 
+structures inside memory-mapped files or shared segments—such as complex nodes in persistent 
+indexes or shared-memory rings—ensuring that pointers remain fully functional even when the 
+underlying memory buffer is mapped into a completely different virtual address space on subsequent runs.
+*/
+
 use std::marker::PhantomData;
 
 pub struct RelativePointer<T> {

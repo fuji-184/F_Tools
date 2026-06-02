@@ -1,3 +1,14 @@
+
+/*
+Probabilistic membership filter to prevent unnecessary database or disk lookups.
+
+This structure acts as a fast, low-memory checkpoint to verify if an item exists 
+in a massive dataset. It is primarily used to eliminate expensive operations—such 
+as scanning heavy databases, hitting external APIs, or loading files from disk—by 
+instantly identifying when an item is definitely missing, significantly reducing 
+system infrastructure latency.
+*/
+
 use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
 

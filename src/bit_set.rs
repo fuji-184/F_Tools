@@ -1,3 +1,15 @@
+
+/*
+High-performance boolean flag container using packed bit-fields.
+
+This structure maps 64 independent boolean states onto a single 64-bit integer, providing 
+extremely dense storage and hardware-accelerated set, clear, and query operations. It is 
+primarily used to optimize state management—such as tracking task completion statuses 
+in parallel pipelines, managing resource allocation masks for worker pools, or implementing 
+fast Bloom filter primitives—by drastically reducing memory bandwidth requirements and 
+leveraging CPU-level bitwise instructions for near-instant status checking.
+*/
+
 pub struct BitSet(u64);
 
 impl BitSet {

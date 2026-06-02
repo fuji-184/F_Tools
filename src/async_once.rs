@@ -1,3 +1,13 @@
+
+/*
+Asynchronous thread-safe one-time initialization cell.
+
+This structure guarantees that a shared resource or heavy dependency is initialized 
+exactly once across concurrent execution flows. If multiple asynchronous tasks attempt 
+to access uninitialized data simultaneously, they will safely suspend and wait for the 
+first worker to complete the setup closure, thereafter resolving to the same shared reference.
+*/
+
 use tokio::sync::OnceCell;
 
 pub struct AsyncOnce<T> {

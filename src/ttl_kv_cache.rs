@@ -1,3 +1,14 @@
+
+/*
+Thread-safe, Time-To-Live (TTL) based in-memory cache for expiring data.
+
+This structure synchronizes concurrent read/write access to a hash map using an RwLock, 
+ensuring that multiple threads can query the cache simultaneously while exclusive access 
+is reserved for updates or eviction. It is primarily used to manage short-lived, frequently accessed data—such as authentication tokens, API response buffers, or ephemeral configuration 
+flags—by automatically validating item freshness against a stored expiry timestamp and 
+performing lazy eviction upon access to keep the memory footprint bounded.
+*/
+
 use std::collections::HashMap;
 use std::sync::RwLock;
 use std::time::{Duration, Instant};

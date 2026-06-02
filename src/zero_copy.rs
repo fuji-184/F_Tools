@@ -1,3 +1,10 @@
+
+/*
+High-performance zero-copy data transfer utility for kernel-level I/O.
+
+This structure interfaces directly with Linux kernel primitives—specifically `splice` and `sendfile`—to move data between file descriptors without copying it through user-space memory. By bypassing the traditional read-to-buffer and buffer-to-write cycle, it eliminates expensive context switches and memory duplication. It is primarily used to build ultra-fast networking and storage services—such as high-throughput static web servers or file-streaming proxies—where minimizing CPU overhead and maximizing throughput for large data transfers are paramount.
+*/
+
 use std::os::unix::io::AsRawFd;
 use std::io;
 use libc::{splice, pipe, close, SPLICE_F_MOVE, SPLICE_F_MORE};

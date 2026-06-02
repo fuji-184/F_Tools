@@ -1,3 +1,15 @@
+
+/*
+Thread affinity and real-time scheduling control for high-performance computing.
+
+This utility manages low-level OS scheduling policies by pinning execution threads to 
+specific physical CPU cores and promoting threads to real-time (FIFO) scheduling priority. 
+It is primarily used to eliminate scheduling jitter and cache-miss overhead in latency-sensitive 
+applications—such as high-frequency trading engines, audio processing pipelines, or real-time 
+data capture systems—by ensuring dedicated compute resources remain uninterrupted by the 
+OS scheduler and that cache locality is maintained for critical hot-path tasks.
+*/
+
 use libc::{cpu_set_t, sched_setaffinity, CPU_SET, CPU_ZERO};
 use std::io;
 //use std::thread::ThreadId;

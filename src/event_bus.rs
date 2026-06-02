@@ -1,3 +1,14 @@
+
+/*
+Centralized message distribution hub to decouple internal components or services.
+
+This structure enables many-to-many communication across independent parts of an 
+application without requiring them to reference each other directly. It is commonly used 
+to broadcast system-wide notifications—such as streaming user activity logs, broadcasting 
+system state alterations to multiple telemetry workers, or distributing configuration hot-reloads 
+simultaneously across different background modules.
+*/
+
 use tokio::sync::broadcast;
 
 pub struct EventBus<T> {

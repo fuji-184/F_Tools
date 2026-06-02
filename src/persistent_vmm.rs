@@ -1,6 +1,16 @@
 
- use std::sync::atomic::{AtomicUsize, Ordering};
- use crate::{MemMap, RelativePointer};
+/*
+Thread-safe, lock-free virtual memory allocator for persistent on-disk data structures.
+
+This structure converts a memory-mapped file into a permanent, lock-free heap space capable 
+of surviving application restarts. It is primarily used to build highly durable, zero-copy 
+storage engines—such as persistent B-trees, embedded key-value stores, or large shared-memory 
+data graphs—by using lock-free pointer increments and position-independent offsets to safely 
+allocate data fields that remain completely valid across restarts or multiple operating system tasks.
+*/
+
+use std::sync::atomic::{AtomicUsize, Ordering};
+use crate::{MemMap, RelativePointer};
 
 #[repr(C)]
 pub struct VmmHeader {

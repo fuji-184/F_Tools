@@ -1,3 +1,14 @@
+
+/*
+Hardware-aware memory allocation controller to optimize data locality on multi-socket systems.
+
+This structure forces the operating system kernel to allocate specific memory buffers within 
+the exact physical RAM bank attached to the CPU core executing the code. It is primarily used 
+in high-performance, low-latency infrastructure—such as core database storage engines, heavy 
+multithreaded data engines, or low-level network routers—to completely eliminate inter-socket 
+bus penalties and maximize hardware cache speeds.
+*/
+
 use libc::{c_int, c_long, syscall, SYS_get_mempolicy, SYS_mbind};
 use std::ptr;
 use std::io;

@@ -1,3 +1,14 @@
+
+/*
+Fault tolerance mechanism to prevent cascading failures in distributed systems.
+
+This structure protects the application from broken dependencies, slow external APIs, 
+or unresponsive services. When a targeted downstream dependency fails repeatedly, 
+the mechanism automatically cuts off further traffic to that service, failing fast to 
+save system resources and allowing the struggling remote system time to recover before 
+gradually letting new requests pass through again.
+*/
+
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 

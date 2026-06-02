@@ -1,3 +1,13 @@
+
+/*
+Low-level operating system primitive for building ultra-fast custom synchronization abstractions.
+
+This mechanism acts as the foundation for construct elements like custom mutexes, condition 
+variables, and thread primitives. It prevents threads from consuming CPU cycles by putting 
+them into an efficient sleep state directly via the OS kernel when an expected condition 
+is not met, and allows other threads to instantly wake them up once the resource becomes free.
+*/
+
 use std::sync::atomic::AtomicU32;
 use std::ptr;
 

@@ -1,3 +1,14 @@
+
+/*
+Self-referential data container to safely bundle an owned object alongside references to itself.
+
+This mechanism bypasses the Rust borrow checker's strict restrictions against objects holding 
+internal references to their own heap-allocated fields. It is primarily used to clean up complex 
+data architectures—such as pairing an owned string buffer with a zero-copy structured parser, 
+or attaching an arena allocator block to index nodes that point inside it—by anchoring the data 
+source in a stable heap location and erasing lifetime parameters to provide a single, movable type.
+*/
+
 use std::marker::PhantomData;
 use std::ptr::NonNull;
 

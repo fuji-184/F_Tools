@@ -1,3 +1,15 @@
+
+/*
+Shared memory manager for ultra-low latency data exchange between independent processes.
+
+This structure bypasses traditional operating system networking stacks, pipes, or disk I/O 
+by mapping a raw region of physical RAM directly into the address spaces of multiple running 
+programs simultaneously. It is primarily used to build high-performance inter-process 
+communication (IPC) systems—such as streaming high-frequency market feeds to trading bots, 
+passing video frames between rendering services, or synchronizing fast in-memory caches—allowing 
+different applications to read and write shared data at native memory speeds.
+*/
+
 use libc::{shm_open, ftruncate, mmap, munmap, close, shm_unlink};
 use libc::{O_CREAT, O_RDWR, PROT_READ, PROT_WRITE, MAP_SHARED, S_IRUSR, S_IWUSR};
 use std::io;

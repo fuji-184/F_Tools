@@ -1,3 +1,13 @@
+
+/*
+Thread-safe bitmap for lock-free bitwise state manipulation and flag tracking.
+
+This structure manages an array of atomic 64-bit integers to support highly concurrent
+indexing, setting, clearing, and probing of individual boolean indicators. By leveraging 
+fine-grained atomic operations with relaxed memory ordering constraints, it avoids internal
+lock contention across thread boundaries while minimizing footprint requirements.
+*/
+
 use std::sync::atomic::{AtomicU64, Ordering};
 
 pub struct AtomicBitSet {

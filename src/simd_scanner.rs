@@ -1,4 +1,15 @@
 
+/*
+Cross-platform SIMD-accelerated byte scanning engine for high-throughput pattern matching.
+
+This implementation utilizes CPU-specific vector instructions (AVX2, SSE4.2, and NEON) to 
+scan large buffers of memory in parallel. By comparing multiple bytes simultaneously 
+within 128-bit or 256-bit registers, it drastically reduces the clock cycles required 
+for searches compared to standard iterative approaches. It is primarily used to optimize 
+data processing pipelines—such as fast text parsing, log analysis, or binary stream 
+scanning—where search performance is a critical bottleneck.
+*/
+
 #[cfg(target_arch = "x86_64")]
 use std::arch::x86_64::*;
 #[cfg(target_arch = "aarch64")]

@@ -1,3 +1,13 @@
+
+/*
+Asynchronous leaky bucket rate limiter for smooth traffic shaping.
+
+This structure controls request distribution by accumulating tokens at a steady refill rate 
+up to a maximum burst capacity. When resources are depleted, tasks seeking acquisition are 
+suspended non-blockingly via calculated async timeouts until the bucket recovers sufficient 
+capacity, enforcing a consistent throughput ceiling across concurrent execution contexts.
+*/
+
 use tokio::time::{Duration, Instant, sleep};
 use tokio::sync::Mutex;
 

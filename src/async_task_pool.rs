@@ -1,3 +1,13 @@
+
+/*
+Asynchronous task pool with bounded queue, worker throttling, and cancellation tokens.
+
+This structure coordinates a configurable number of background worker loops that pull closure 
+jobs from an unbounded/bounded MPSC channel. It isolates synchronous block segments safely 
+within `spawn_blocking`, applies distinct processing timeout configurations per worker thread, 
+and supports deterministic, cooperative graceful shutdown procedures via cancellation tokens.
+*/
+
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 use std::sync::Arc;

@@ -1,3 +1,15 @@
+
+/*
+Synchronization primitives for tracking and blocking on concurrent tasks execution.
+
+This module provides two implementations of a WaitGroup pattern:
+1. `WaitGroup`: A cross-platform implementation using standard primitives (`Mutex` and `Condvar`).
+2. `FutexWaitGroup`: A high-performance, lock-free Linux-specific alternative powered by system futex calls.
+
+These structures allow a main execution flow to spawn multiple background tasks (either via 
+native OS threads or async task runtimes) and block until all concurrent operations signal completion.
+*/
+
 use std::sync::{Arc, Condvar, Mutex};
 use std::sync::atomic::{AtomicUsize, Ordering, AtomicU32};
 

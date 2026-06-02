@@ -1,3 +1,14 @@
+
+/*
+State tracking and change-notification cell to broadcast the latest value to multiple readers.
+
+This structure retains a single, up-to-date value and instantly signals an arbitrary number of 
+downstream consumers whenever that value gets modified. It is primarily used to distribute 
+reactive configuration variables or state updates—such as updating global feature flags, broadcasting 
+system health status alterations, or signaling cluster topology changes—allowing clients to either 
+instantly pull the latest data cache or await the next state transition asynchronously.
+*/
+
 use tokio::sync::watch;
 
 pub struct Notif<T> {

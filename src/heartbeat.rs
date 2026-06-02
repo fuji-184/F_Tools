@@ -1,3 +1,15 @@
+
+/*
+Distributed health-check primitive for monitoring the liveness of parallel worker nodes.
+
+This structure tracks the last successful communication timestamp from multiple worker 
+instances and identifies those that have exceeded a predefined survival threshold. It is 
+primarily used in distributed system coordination—such as managing cluster membership, 
+triggering failover routines for crashed microservices, or cleaning up stale job registrations—by 
+providing a robust, lock-protected mechanism to differentiate between transient network jitter 
+and actual node failure.
+*/
+
 use std::collections::HashMap;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};

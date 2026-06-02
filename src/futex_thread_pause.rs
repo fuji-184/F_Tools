@@ -1,3 +1,14 @@
+
+/*
+Thread synchronization barrier to coordinate phase-based execution across parallel workers.
+
+This mechanism forces a designated number of threads to pause and align at a specific 
+checkpoint before any of them are permitted to advance further. It is primarily used 
+to synchronize cyclical, multi-step operations—such as parallel game loop rendering stages, 
+multi-threaded matrix math computations, or batch data processing pipelines—ensuring that 
+no worker begins the next stage until all workers have finished the current one.
+*/
+
 use std::sync::atomic::{AtomicI32, Ordering};
 use libc::{syscall, SYS_futex};
 

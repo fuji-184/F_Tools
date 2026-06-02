@@ -1,3 +1,13 @@
+
+/*
+Asynchronous event debouncing with optional deduplication.
+
+This module provides a mechanism to delay the execution of an action until a burst
+of rapidly firing events has ceased. Only the final item received within the specified
+"wait" duration is processed, preventing system overload from high-frequency inputs.
+It optionally supports a "distinct" flag to skip consecutive duplicate events.
+*/
+
 use std::time::Duration;
 use tokio::sync::mpsc;
 

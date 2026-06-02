@@ -1,3 +1,14 @@
+
+/*
+State synchronization mechanism to minimize network bandwidth or replication payload.
+
+This utility isolates individual element modifications between array states instead of 
+transmitting full datasets. It is primarily used to optimize data transfer over networks—such 
+as updating entity attributes in multiplayer game servers, syncing partial state mutations 
+to frontend clients, or replicating localized configuration updates—by capturing and applying 
+only the specific indexes that changed.
+*/
+
 #[derive(Debug, Clone)]
 pub struct DeltaValue<T> {
     pub index: u8,   

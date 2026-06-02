@@ -1,3 +1,15 @@
+
+/*
+Lightweight task scheduler for executing periodic background operations based on time intervals.
+
+This scheduler maintains a registry of named tasks, each associated with a specific execution 
+cadence. It continuously monitors the elapsed time since each job's last invocation, triggering 
+execution only when the predefined duration has expired. It is primarily used for automating 
+repetitive system maintenance—such as periodic cache flushing, automated telemetry cleanup, 
+or status heartbeat reporting—providing an internal mechanism to batch and track the success 
+rates of repetitive background routines without requiring heavy OS-level process scheduling.
+*/
+
 use std::time::{Duration, Instant};
 
 pub struct CronJob<'a> {
