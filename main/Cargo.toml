@@ -4,10 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+aes-gcm = "0.10.3"
+dotenvy = "0.15.7"
 ftool = { path = "../", features = ["async_cross_thread", "libc"] }
+hex = "0.4.3"
+rand = "0.10.1"
 tokio = { version = "1.52.2", features = ["full"] }
 tokio-scoped = "0.2.0"
-
-[dev-dependencies]
-#ftest = { git = "https://github.com/fuji-184/FTest" }
-

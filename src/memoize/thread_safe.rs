@@ -45,3 +45,24 @@ where
         result
     }
 }
+
+ftest::test!(memoize_thread_safe_test, {
+
+    test_memoize {
+      let m = MemoizeThreadSafe::new(10, |(a, b): (i32, i32)| {
+        a * b
+      });
+      
+      let a = [
+          (2, 3, 6),
+          (8, 2, 16),
+          (9, 9, 81)
+      ];
+      
+      for (a, b, c) in a {
+          let res = m.call((a, b));
+          assert_eq!(res, c);
+      }
+    }
+    
+});

@@ -56,3 +56,30 @@ impl CycleCounter {
         }
     }
 }
+
+ftest::test!(cycle_counter_tests, {
+    test_counter_measurement {
+        let counter = CycleCounter::start();
+        
+        let mut sum = 0u64;
+        for i in 0..1000 {
+            sum = sum.wrapping_add(i);
+        }
+        std::hint::black_box(sum);
+
+        let result = counter.elapsed();
+
+        assert!(result.cycles > 0);
+    }
+
+    test_same_core_verification {
+        let counter = CycleCounter::start();
+        let result = counter.elapsed();
+
+        if counter.start_core == result.core_id {
+            assert!(counter.is_same_core(&result));
+        } else {
+            assert!(!counter.is_same_core(&result));
+        }
+    }
+});

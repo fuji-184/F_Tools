@@ -56,3 +56,30 @@ impl BloomFilter {
         true
     }
 }
+
+ftest::test!(bloom_filter_tests, {
+    test_insert_and_contains {
+        let mut filter = BloomFilter::new(1000, 3);
+        let item1 = "hello";
+        let item2 = "world";
+
+        assert!(!filter.contains(&item1));
+        assert!(!filter.contains(&item2));
+
+        filter.insert(&item1);
+
+        assert!(filter.contains(&item1));
+        assert!(!filter.contains(&item2));
+    }
+
+    test_clear_separation {
+        let mut filter = BloomFilter::new(500, 4);
+        let val1 = 42;
+        let val2 = 99;
+
+        filter.insert(&val1);
+
+        assert!(filter.contains(&val1));
+        assert!(!filter.contains(&val2));
+    }
+});

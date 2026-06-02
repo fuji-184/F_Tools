@@ -32,3 +32,30 @@ impl Futex {
         }
     }
 }
+
+ftest::test!(futex_tests, {
+    test_futex_wait_and_wake {
+        let addr = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
+        let addr_clone = addr.clone();
+
+        let handle = std::thread::spawn(move || {
+            Futex::wait(&addr_clone, 0);
+            assert_eq!(addr_clone.load(std::sync::atomic::Ordering::Acquire), 1);
+        });
+
+        std::thread::sleep(std::time::Duration::from_millis(10));
+        addr.store(1, std::sync::atomic::Ordering::Release);
+        Futex::wake(&addr, 1);
+
+        assert!(handle.join().is_ok());
+    }
+
+    test_futex_wait_no_block_if_value_mismatch {
+        let addr = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(42));
+        let start = std::time::Instant::now();
+
+        Futex::wait(&addr, 0);
+
+        assert!(start.elapsed() < std::time::Duration::from_millis(10));
+    }
+});

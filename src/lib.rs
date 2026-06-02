@@ -50,7 +50,9 @@ mod async_once;
 #[cfg(feature = "async_cross_thread")]
 pub use async_once::*;
 
+#[cfg(feature = "async_cross_thread")]
 mod notif;
+#[cfg(feature = "async_cross_thread")]
 pub use notif::*;
 
 pub mod sharded;
@@ -58,7 +60,9 @@ pub mod sharded;
 mod circuit_breaker;
 pub use circuit_breaker::*;
 
+#[cfg(feature = "async_cross_thread")]
 mod event_bus;
+#[cfg(feature = "async_cross_thread")]
 pub use event_bus::*;
 
 #[cfg(feature = "async_cross_thread")]
@@ -148,7 +152,9 @@ pub use numa_memory_bind::*;
 mod relative_pointer;
 pub use relative_pointer::*;
 
+#[cfg(feature = "libc")]
 mod persistent_vmm;
+#[cfg(feature = "libc")]
 pub use persistent_vmm::*;
 
 mod simd_scanner;
@@ -157,7 +163,9 @@ pub use simd_scanner::*;
 mod local_async_scope;
 pub use local_async_scope::*;
 
+#[cfg(feature = "async_cross_thread")]
 mod global_async_scope;
+#[cfg(feature = "async_cross_thread")]
 pub use global_async_scope::*;
 
 mod self_reference;

@@ -30,3 +30,37 @@ impl BitSet {
         }
     }
 }
+
+ftest::test!(bit_set_tests, {
+    test_basic_operations {
+        let mut bitset = BitSet::new();
+
+        assert!(!bitset.is_set(3));
+        assert_eq!(bitset.count_set(), 0);
+
+        bitset.set(3);
+        bitset.set(5);
+
+        assert!(bitset.is_set(3));
+        assert!(bitset.is_set(5));
+        assert!(!bitset.is_set(4));
+        assert_eq!(bitset.count_set(), 2);
+
+        bitset.clear(3);
+        assert!(!bitset.is_set(3));
+        assert!(bitset.is_set(5));
+        assert_eq!(bitset.count_set(), 1);
+    }
+
+    test_find_unset {
+        let mut bitset = BitSet::new();
+        assert_eq!(bitset.find_unset(), Some(0));
+
+        bitset.set(0);
+        bitset.set(1);
+        assert_eq!(bitset.find_unset(), Some(2));
+
+        bitset.0 = u64::MAX;
+        assert_eq!(bitset.find_unset(), None);
+    }
+});

@@ -38,3 +38,26 @@ impl<K: std::hash::Hash + Eq, V: Clone> ThreadSafeTtlCache<K, V> {
         None
     }
 }
+
+ftest::test!(thread_safe_ttl_cache_tests, {
+    test_insert_and_get_valid {
+        let cache = ThreadSafeTtlCache::new();
+        cache.insert("key1", "value1".to_string(), Duration::from_secs(60));
+
+        assert_eq!(cache.get(&"key1"), Some("value1".to_string()));
+    }
+
+    test_get_expired_returns_none_and_evicts {
+        let cache = ThreadSafeTtlCache::new();
+        cache.insert("key2", "value2".to_string(), Duration::from_nanos(1));
+
+        std::thread::sleep(Duration::from_millis(1));
+
+        assert_eq!(cache.get(&"key2"), None);
+    }
+
+    test_get_non_existent {
+        let cache = ThreadSafeTtlCache::<i32, String>::new();
+        assert_eq!(cache.get(&99), None);
+    }
+});

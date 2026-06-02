@@ -29,3 +29,42 @@ impl SliceDeltaSync {
         }
     }
 }
+
+ftest::test!(slice_delta_sync_tests, {
+    test_compare_identifies_changes {
+        let old = [10, 20, 30, 40];
+        let new = [10, 99, 30, 88];
+
+        let deltas = SliceDeltaSync::compare(&old, &new);
+
+        assert_eq!(deltas.len(), 2);
+        assert_eq!(deltas[0].index, 1);
+        assert_eq!(deltas[0].data, 99);
+        assert_eq!(deltas[1].index, 3);
+        assert_eq!(deltas[1].data, 88);
+    }
+
+    test_apply_updates_base_slice {
+        let mut base = [10, 20, 30, 40];
+        let deltas = vec![
+            DeltaValue { index: 1, data: 99 },
+            DeltaValue { index: 3, data: 88 },
+        ];
+
+        SliceDeltaSync::apply(&mut base, deltas);
+
+        assert_eq!(base, [10, 99, 30, 88]);
+    }
+
+    test_apply_ignores_out_of_bounds {
+        let mut base = [10, 20];
+        let deltas = vec![
+            DeltaValue { index: 0, data: 99 },
+            DeltaValue { index: 5, data: 88 },
+        ];
+
+        SliceDeltaSync::apply(&mut base, deltas);
+
+        assert_eq!(base, [99, 20]);
+    }
+});

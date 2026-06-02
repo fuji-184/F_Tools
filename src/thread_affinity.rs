@@ -1,6 +1,6 @@
 use libc::{cpu_set_t, sched_setaffinity, CPU_SET, CPU_ZERO};
 use std::io;
-use std::thread::ThreadId;
+//use std::thread::ThreadId;
 
 pub struct ThreadToCPU;
 
@@ -36,3 +36,31 @@ impl ThreadToCPU {
         Ok(())
     }
 }
+
+ftest::test!(thread_to_cpu_tests, {
+    test_pin_current_thread {
+        let res = ThreadToCPU::pin_current_thread(0);
+        if res.is_err() {
+            let err = res.unwrap_err();
+            assert!(
+                err.kind() == std::io::ErrorKind::PermissionDenied || 
+                err.raw_os_error() == Some(libc::EINVAL)
+            );
+        } else {
+            assert!(res.is_ok());
+        }
+    }
+
+    test_set_realtime_priority {
+        let res = ThreadToCPU::set_realtime_priority();
+        if res.is_err() {
+            let err = res.unwrap_err();
+            assert!(
+                err.kind() == std::io::ErrorKind::PermissionDenied || 
+                err.raw_os_error() == Some(libc::EPERM)
+            );
+        } else {
+            assert!(res.is_ok());
+        }
+    }
+});

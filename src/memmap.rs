@@ -1,4 +1,4 @@
-use std::fs::{File, OpenOptions};
+use std::fs::OpenOptions;
 use std::os::unix::io::AsRawFd;
 use std::ptr;
 use std::slice;
@@ -129,3 +129,118 @@ impl<'a, T: Pod> StructView<'a, T> {
         self.data
     }
 }
+
+ftest::test!(mem_map_and_struct_view_tests, {
+    test_mem_map_write_and_read {
+        let dir = std::env::temp_dir();
+        let path = dir.join("test_mem_map_1.bin");
+        
+        {
+            let mut mmap = MemMap::open(&path, true, Some(128)).unwrap();
+            assert_eq!(mmap.len(), 128);
+            
+            let slice = mmap.as_mut_slice();
+            slice[0] = b'H';
+            slice[1] = b'i';
+            mmap.flush().unwrap();
+        }
+
+        {
+            let mmap = MemMap::open(&path, false, None).unwrap();
+            assert_eq!(mmap.len(), 128);
+            
+            let slice = mmap.as_slice();
+            assert_eq!(slice[0], b'H');
+            assert_eq!(slice[1], b'i');
+            
+            assert_eq!(&mmap.as_str_unchecked()[0..2], "Hi");
+            assert_eq!(mmap.as_str().unwrap()[0..2].to_string(), "Hi".to_string());
+        }
+
+        let _ = std::fs::remove_file(path);
+    }
+
+    test_mem_map_empty_file_error {
+        let dir = std::env::temp_dir();
+        let path = dir.join("test_mem_map_empty.bin");
+        std::fs::File::create(&path).unwrap();
+
+        let mmap = MemMap::open(&path, false, None);
+        assert!(mmap.is_err());
+
+        let _ = std::fs::remove_file(path);
+    }
+
+    test_struct_view_success {
+        #[derive(Copy, Clone, PartialEq, Debug)]
+        #[repr(C)]
+        struct TestStruct {
+            a: u32,
+            b: u64,
+        }
+        unsafe impl Pod for TestStruct {}
+
+        let mut bytes = vec![0u8; 32];
+        let ptr = bytes.as_mut_ptr();
+        
+        let offset = if (ptr as usize) % std::mem::align_of::<TestStruct>() == 0 {
+            0
+        } else {
+            std::mem::align_of::<TestStruct>() - ((ptr as usize) % std::mem::align_of::<TestStruct>())
+        };
+
+        let aligned_slice = &mut bytes[offset..(offset + std::mem::size_of::<TestStruct>())];
+        
+        let sample = TestStruct { a: 1337, b: 424242 };
+        unsafe {
+            std::ptr::copy_nonoverlapping(
+                &sample as *const TestStruct as *const u8,
+                aligned_slice.as_mut_ptr(),
+                std::mem::size_of::<TestStruct>(),
+            );
+        }
+
+        let view = StructView::<TestStruct>::new(aligned_slice);
+        assert!(view.is_some());
+        assert_eq!(view.unwrap().get(), &sample);
+    }
+
+    test_struct_view_insufficient_bytes {
+        #[derive(Copy, Clone)]
+        #[repr(C)]
+        struct TestStruct {
+            a: u64,
+        }
+        unsafe impl Pod for TestStruct {}
+
+        let bytes = vec![0u8; 4];
+        let view = StructView::<TestStruct>::new(&bytes);
+        assert!(view.is_none());
+    }
+
+    test_struct_view_misaligned {
+        #[derive(Copy, Clone)]
+        #[repr(C)]
+        struct TestStruct {
+            a: u64,
+        }
+        unsafe impl Pod for TestStruct {}
+
+        let bytes = vec![0u8; 32];
+        let ptr = bytes.as_ptr();
+        
+        let mut unaligned_idx = 0;
+        for i in 0..8 {
+            if ((ptr as usize) + i) % std::mem::align_of::<TestStruct>() != 0 {
+                unaligned_idx = i;
+                break;
+            }
+        }
+
+        if unaligned_idx != 0 && unaligned_idx + std::mem::size_of::<TestStruct>() <= bytes.len() {
+            let misaligned_slice = &bytes[unaligned_idx..(unaligned_idx + std::mem::size_of::<TestStruct>())];
+            let view = StructView::<TestStruct>::new(misaligned_slice);
+            assert!(view.is_none());
+        }
+    }
+});

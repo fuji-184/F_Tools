@@ -1,4 +1,4 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
 #[derive(Debug, PartialEq)]
@@ -50,3 +50,35 @@ impl CircuitBreaker {
         }
     }
 }
+
+ftest::test!(circuit_breaker_tests, {
+    test_closed_state_success {
+        let cb = CircuitBreaker::new(3, Duration::from_millis(50));
+        let res: Result<i32, String> = cb.call(|| Ok::<i32, &str>(42));
+        assert_eq!(res, Ok(42));
+    }
+
+    test_trip_to_open_state {
+        let cb = CircuitBreaker::new(2, Duration::from_millis(50));
+
+        let _ = cb.call(|| Err::<(), &str>("fail"));
+        let _ = cb.call(|| Err::<(), &str>("fail"));
+
+        let res = cb.call(|| Ok::<i32, &str>(42));
+        assert_eq!(res, Err("Circuit is OPEN".to_string()));
+    }
+
+    test_half_open_recovery {
+        let cb = CircuitBreaker::new(1, Duration::from_millis(10));
+
+        let _ = cb.call(|| Err::<(), &str>("fail"));
+
+        std::thread::sleep(Duration::from_millis(15));
+
+        let res = cb.call(|| Ok::<i32, &str>(100));
+        assert_eq!(res, Ok(100));
+
+        let res_subsequent = cb.call(|| Ok::<i32, &str>(200));
+        assert_eq!(res_subsequent, Ok(200));
+    }
+});

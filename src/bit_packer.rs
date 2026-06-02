@@ -38,3 +38,49 @@ impl BitPacker {
         T::to_parts(packed)
     }
 }
+
+ftest::test!(bit_packer_tests, {
+    test_u16_packing {
+        let high: u8 = 171;
+        let low: u8 = 205;
+        let packed: u16 = BitPacker::pack(high, low);
+        assert_eq!(packed, 43981);
+
+        let (unpacked_high, unpacked_low) = BitPacker::unpack(packed);
+        assert_eq!(unpacked_high, high);
+        assert_eq!(unpacked_low, low);
+    }
+
+    test_u32_packing {
+        let high: u16 = 4660;
+        let low: u16 = 22136;
+        let packed: u32 = BitPacker::pack(high, low);
+        assert_eq!(packed, 305419896);
+
+        let (unpacked_high, unpacked_low) = BitPacker::unpack(packed);
+        assert_eq!(unpacked_high, high);
+        assert_eq!(unpacked_low, low);
+    }
+
+    test_u64_packing {
+        let high: u32 = 287454020;
+        let low: u32 = 1432778632;
+        let packed: u64 = BitPacker::pack(high, low);
+        assert_eq!(packed, 1234605616436508552);
+
+        let (unpacked_high, unpacked_low) = BitPacker::unpack(packed);
+        assert_eq!(unpacked_high, high);
+        assert_eq!(unpacked_low, low);
+    }
+
+    test_u128_packing {
+        let high: u64 = 123456789012345678;
+        let low: u64 = 987654321098765432;
+        let packed: u128 = BitPacker::pack(high, low);
+        assert_eq!(packed, 2277375791072698124611201734874281080);
+
+        let (unpacked_high, unpacked_low) = BitPacker::unpack(packed);
+        assert_eq!(unpacked_high, high);
+        assert_eq!(unpacked_low, low);
+    }
+});

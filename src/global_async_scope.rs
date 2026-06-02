@@ -47,12 +47,8 @@ impl<'a> Drop for GlobalAsyncScope<'a> {
         for handle in &self.handles {
             handle.abort();
         }
-
-        futures::executor::block_on(async {
-            for handle in self.handles.drain(..) {
-                let _ = handle.await;
-            }
-        });
+        
+        self.handles.clear();
     }
 }
 
@@ -68,3 +64,47 @@ where
     scope.wait_all().await;
     result
 }
+
+ftest::test!(global_async_scope_tests, {
+    test_scope_spawns_and_waits.tokio {
+        let counter = std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let counter_clone1 = counter.clone();
+        let counter_clone2 = counter.clone();
+
+        let result = global_async_scope(|scope| {
+            Box::pin(async move {
+                scope.spawn(async move {
+                    tokio::time::sleep(std::time::Duration::from_millis(5)).await;
+                    counter_clone1.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                });
+
+                scope.spawn(async move {
+                    tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+                    counter_clone2.fetch_add(2, std::sync::atomic::Ordering::SeqCst);
+                });
+
+                42
+            })
+        })
+        .await;
+
+        assert_eq!(result, 42);
+        assert_eq!(counter.load(std::sync::atomic::Ordering::SeqCst), 3);
+    }
+
+    test_scope_aborts_on_drop.tokio {
+        let counter = std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let counter_clone = counter.clone();
+
+        {
+            let mut scope = GlobalAsyncScope::new();
+            scope.spawn(async move {
+                tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+                counter_clone.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            });
+        }
+
+        tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+        assert_eq!(counter.load(std::sync::atomic::Ordering::SeqCst), 0);
+    }
+});

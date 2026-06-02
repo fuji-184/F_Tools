@@ -46,3 +46,78 @@ impl ZeroCopy {
         }
     }
 }
+
+ftest::test!(zero_copy_tests, {
+    test_zero_copy_splice_pipe {
+        use std::fs::File;
+        use std::io::{Read, Write};
+
+        let dir = std::env::temp_dir();
+        let src_path = dir.join("zero_copy_src_splice.bin");
+        let dst_path = dir.join("zero_copy_dst_splice.bin");
+
+        {
+            let mut src_file = File::create(&src_path).unwrap();
+            src_file.write_all(b"zero-copy-splice-data").unwrap();
+        }
+
+        {
+            let src_file = File::open(&src_path).unwrap();
+            let dst_file = File::create(&dst_path).unwrap();
+
+            let bytes_sent = ZeroCopy::send(&src_file, &dst_file, 21);
+            if let Err(err) = bytes_sent {
+                assert!(
+                    err.kind() == std::io::ErrorKind::PermissionDenied || 
+                    err.raw_os_error() == Some(libc::EINVAL)
+                );
+            } else {
+                assert_eq!(bytes_sent.unwrap(), 21);
+                
+                let mut check_file = File::open(&dst_path).unwrap();
+                let mut buf = Vec::new();
+                check_file.read_to_end(&mut buf).unwrap();
+                assert_eq!(buf, b"zero-copy-splice-data");
+            }
+        }
+
+        let _ = std::fs::remove_file(src_path);
+        let _ = std::fs::remove_file(dst_path);
+    }
+
+    test_zero_copy_sendfile {
+        use std::fs::File;
+        use std::io::{Read, Write};
+        use std::os::unix::net::UnixStream;
+
+        let dir = std::env::temp_dir();
+        let src_path = dir.join("zero_copy_src_sendfile.bin");
+
+        {
+            let mut src_file = File::create(&src_path).unwrap();
+            src_file.write_all(b"zero-copy-sendfile-data").unwrap();
+        }
+
+        {
+            let (mut rx, tx) = UnixStream::pair().unwrap();
+            let src_file = File::open(&src_path).unwrap();
+
+            let bytes_sent = ZeroCopy::send_file(&src_file, &tx, 23);
+            if let Err(err) = bytes_sent {
+                assert!(
+                    err.kind() == std::io::ErrorKind::PermissionDenied || 
+                    err.raw_os_error() == Some(libc::EINVAL) ||
+                    err.raw_os_error() == Some(libc::ENOTSOCK)
+                );
+            } else {
+                assert_eq!(bytes_sent.unwrap(), 23);
+
+                let mut buf = vec![0u8; 23];
+                rx.read_exact(&mut buf).unwrap();
+                assert_eq!(buf, b"zero-copy-sendfile-data");
+            }
+        }
+
+        let _ = std::fs::remove_file(src_path);
+    }
+});

@@ -55,3 +55,49 @@ impl FutexThreadPause {
         }
     }
 }
+
+ftest::test!(futex_thread_pause_tests, {
+    test_barrier_synchronization {
+        let barrier = std::sync::Arc::new(FutexThreadPause::new(3));
+        let counter = std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let mut handles = Vec::new();
+
+        for _ in 0..3 {
+            let b = barrier.clone();
+            let c = counter.clone();
+            handles.push(std::thread::spawn(move || {
+                c.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                b.wait();
+                assert_eq!(c.load(std::sync::atomic::Ordering::SeqCst), 3);
+            }));
+        }
+
+        for handle in handles {
+            assert!(handle.join().is_ok());
+        }
+    }
+
+    test_multiple_generations {
+        let barrier = std::sync::Arc::new(FutexThreadPause::new(2));
+        let counter = std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let mut handles = Vec::new();
+
+        for _ in 0..2 {
+            let b = barrier.clone();
+            let c = counter.clone();
+            handles.push(std::thread::spawn(move || {
+                c.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                b.wait();
+
+                c.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                b.wait();
+            }));
+        }
+
+        for handle in handles {
+            assert!(handle.join().is_ok());
+        }
+
+        assert_eq!(counter.load(std::sync::atomic::Ordering::SeqCst), 4);
+    }
+});

@@ -69,3 +69,79 @@ impl PersistentVmm {
         unsafe { &mut *root_ptr }
     }
 }
+
+ftest::test!(persistent_vmm_tests, {
+    test_new_initializes_header {
+        let dir = std::env::temp_dir();
+        let path = dir.join("test_vmm_header.bin");
+        
+        {
+            let mmap = MemMap::open(&path, true, Some(256)).unwrap();
+            let vmm = PersistentVmm::new(mmap);
+            
+            unsafe {
+                let header = &*(vmm.memmap.ptr as *const VmmHeader);
+                assert_eq!(header.magic, 0x46544F4F4C53);
+                assert_eq!(header.root_offset, std::mem::size_of::<VmmHeader>() as u64);
+            }
+        }
+
+        let _ = std::fs::remove_file(path);
+    }
+
+    test_alloc_and_relative_pointer {
+        let dir = std::env::temp_dir();
+        let path = dir.join("test_vmm_alloc.bin");
+        
+        {
+            let mmap = MemMap::open(&path, true, Some(512)).unwrap();
+            let vmm = PersistentVmm::new(mmap);
+
+            let rel_ptr = vmm.alloc(1337u32);
+            assert!(rel_ptr.is_some());
+
+            unsafe {
+                let base_addr = vmm.memmap.ptr as usize;
+                let resolved_ptr = rel_ptr.unwrap().as_ptr(base_addr);
+                assert_eq!(*resolved_ptr, 1337);
+            }
+        }
+
+        let _ = std::fs::remove_file(path);
+    }
+
+    test_alloc_out_of_bounds {
+        let dir = std::env::temp_dir();
+        let path = dir.join("test_vmm_bounds.bin");
+        
+        {
+            let mmap = MemMap::open(&path, true, Some(64)).unwrap();
+            let vmm = PersistentVmm::new(mmap);
+
+            let rel_ptr = vmm.alloc([0u8; 100]);
+            assert!(rel_ptr.is_none());
+        }
+
+        let _ = std::fs::remove_file(path);
+    }
+
+    test_get_root_mut_ref {
+        let dir = std::env::temp_dir();
+        let path = dir.join("test_vmm_root.bin");
+        
+        {
+            let mmap = MemMap::open(&path, true, Some(256)).unwrap();
+            let vmm = PersistentVmm::new(mmap);
+
+            let root_ref = vmm.get_root_mut_ref::<u64>();
+            *root_ref = 99999;
+
+            let root_ptr = vmm.get_root_ptr::<u64>();
+            unsafe {
+                assert_eq!(*root_ptr, 99999);
+            }
+        }
+
+        let _ = std::fs::remove_file(path);
+    }
+});

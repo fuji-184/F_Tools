@@ -96,3 +96,40 @@ impl SimdCopy {
         }
     }
 }
+
+ftest::test!(simd_copy_tests, {
+    test_simd_copy_small_buffer {
+        let src = vec![1u8, 2, 3, 4, 5];
+        let mut dst = vec![0u8; 5];
+
+        unsafe {
+            SimdCopy::copy(src.as_ptr(), dst.as_mut_ptr(), src.len());
+        }
+
+        assert_eq!(src, dst);
+    }
+
+    test_simd_copy_large_buffer {
+        let src = (0..256).map(|i| (i % 255) as u8).collect::<Vec<u8>>();
+        let mut dst = vec![0u8; 256];
+
+        unsafe {
+            SimdCopy::copy(src.as_ptr(), dst.as_mut_ptr(), src.len());
+        }
+
+        assert_eq!(src, dst);
+    }
+
+    test_simd_copy_with_offsets {
+        let src = vec![10u8; 100];
+        let mut dst = vec![0u8; 120];
+
+        unsafe {
+            SimdCopy::copy(src.as_ptr().add(10), dst.as_mut_ptr().add(20), 50);
+        }
+
+        assert_eq!(&dst[20..70], &src[10..60]);
+        assert_eq!(dst[0], 0);
+        assert_eq!(dst[119], 0);
+    }
+});

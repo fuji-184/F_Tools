@@ -40,3 +40,34 @@ impl AtomicBitSet {
         }
     }
 }
+
+ftest::test!(atomic_bit_set_tests, {
+    test_set_and_check {
+        let bitset = AtomicBitSet::new(130);
+
+        assert!(!bitset.check(5));
+        assert!(!bitset.check(70));
+
+        bitset.set(5);
+        bitset.set(70);
+
+        assert!(bitset.check(5));
+        assert!(bitset.check(70));
+        assert!(!bitset.check(6));
+    }
+
+    test_unset {
+        let bitset = AtomicBitSet::new(64);
+
+        bitset.set(42);
+        assert!(bitset.check(42));
+
+        bitset.unset(42);
+        assert!(!bitset.check(42));
+    }
+
+    test_out_of_bounds {
+        let bitset = AtomicBitSet::new(10);
+        assert!(!bitset.check(20));
+    }
+});

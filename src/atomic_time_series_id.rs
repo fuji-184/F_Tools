@@ -58,3 +58,24 @@ impl AtomicTimeSeriesId {
         }
     }
 }
+
+ftest::test!(atomic_time_series_id_tests, {
+    test_id_generation {
+        let generator = AtomicTimeSeriesId::new(42);
+        let id = generator.next_id();
+        
+        assert_ne!(id, 0);
+        let worker_id_extracted = (id >> 12) & 0x3FF;
+        assert_eq!(worker_id_extracted, 42);
+    }
+
+    test_monotonic_increasing {
+        let generator = AtomicTimeSeriesId::new(1);
+        let id1 = generator.next_id();
+        let id2 = generator.next_id();
+        let id3 = generator.next_id();
+
+        assert!(id2 > id1);
+        assert!(id3 > id2);
+    }
+});

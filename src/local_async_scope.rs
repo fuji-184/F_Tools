@@ -25,3 +25,34 @@ impl<'a> LocalAsyncScope<'a> {
         self.tasks.push(Box::pin(f));
     }
 }
+
+ftest::test!(local_async_scope_tests, {
+    test_scope_spawns_and_awaits_all_tasks.tokio {
+        let counter = std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let counter_clone1 = counter.clone();
+        let counter_clone2 = counter.clone();
+
+        local_async_scope(|scope| {
+            scope.spawn(async move {
+                tokio::time::sleep(std::time::Duration::from_millis(5)).await;
+                counter_clone1.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            });
+
+            scope.spawn(async move {
+                tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+                counter_clone2.fetch_add(2, std::sync::atomic::Ordering::SeqCst);
+            });
+        })
+        .await;
+
+        assert_eq!(counter.load(std::sync::atomic::Ordering::SeqCst), 3);
+    }
+
+    test_empty_scope_completes_immediately.tokio {
+        let start = std::time::Instant::now();
+        
+        local_async_scope(|_scope| {}).await;
+
+        assert!(start.elapsed() < std::time::Duration::from_millis(5));
+    }
+});

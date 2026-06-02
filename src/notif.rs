@@ -19,3 +19,23 @@ impl<T: Clone> Notif<T> {
         self.rx.clone()
     }
 }
+
+ftest::test!(notif_tests, {
+    test_initial_value {
+        let notif = Notif::new(10);
+        let rx = notif.subscribe();
+
+        assert_eq!(*rx.borrow(), 10);
+    }
+
+    test_set_notifies_subscribers.tokio {
+        let notif = Notif::new(10);
+        let mut rx = notif.subscribe();
+
+        notif.set(20);
+
+        assert_eq!(*rx.borrow(), 20);
+        assert!(rx.changed().await.is_ok());
+        assert_eq!(*rx.borrow_and_update(), 20);
+    }
+});

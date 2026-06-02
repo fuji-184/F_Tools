@@ -41,3 +41,19 @@ impl NumaMemoryBind {
         Ok(())
     }
 }
+
+ftest::test!(numa_bind_test, {
+  // skip because my android doesn't support numa :[
+  numa_bind.skip {
+    let node = NumaMemoryBind::get_current_numa_node().unwrap();
+    println!("Thread berjalan di NUMA Node: {}", node);
+
+    let size = 1024 * 1024 * 1024;
+    let layout = std::alloc::Layout::from_size_align(size, 4096).unwrap();
+    let ptr = unsafe { std::alloc::alloc(layout) };
+
+    unsafe {
+        NumaMemoryBind::bind_mem_to_numa_node(ptr, size, node).unwrap();
+    }
+  }
+});

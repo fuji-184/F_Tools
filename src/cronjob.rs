@@ -63,3 +63,63 @@ impl<'a> CronScheduler<'a> {
             .map(|j| (j.run_count, j.success_count))
     }
 }
+
+ftest::test!(cron_scheduler_tests, {
+    test_add_and_tick_trigger {
+        let executed = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+        let executed_clone = executed.clone();
+
+        let mut scheduler = CronScheduler::new();
+        scheduler.add_job("test_job", Duration::from_millis(10), move || {
+            executed_clone.store(true, std::sync::atomic::Ordering::SeqCst);
+            Ok(())
+        });
+
+        std::thread::sleep(Duration::from_millis(15));
+        scheduler.tick();
+
+        assert!(executed.load(std::sync::atomic::Ordering::SeqCst));
+        assert_eq!(scheduler.get_stats("test_job"), Some((1, 1)));
+    }
+
+    test_tick_not_triggered_before_interval {
+        let executed = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+        let executed_clone = executed.clone();
+
+        let mut scheduler = CronScheduler::new();
+        scheduler.add_job("test_job", Duration::from_secs(10), move || {
+            executed_clone.store(true, std::sync::atomic::Ordering::SeqCst);
+            Ok(())
+        });
+
+        scheduler.tick();
+
+        assert!(!executed.load(std::sync::atomic::Ordering::SeqCst));
+        assert_eq!(scheduler.get_stats("test_job"), Some((0, 0)));
+    }
+
+    test_remove_job {
+        let mut scheduler = CronScheduler::new();
+
+        scheduler.add_job("job1", Duration::from_secs(1), || Ok(()));
+        scheduler.add_job("job2", Duration::from_secs(1), || Ok(()));
+
+        assert!(scheduler.remove_job("job1"));
+        assert!(!scheduler.remove_job("job1"));
+        assert_eq!(scheduler.get_stats("job1"), None);
+        assert!(scheduler.get_stats("job2").is_some());
+    }
+
+    test_job_failure_stats {
+        let mut scheduler = CronScheduler::new();
+
+        scheduler.add_job("fail_job", Duration::from_millis(10), || {
+            Err("failed".to_string())
+        });
+
+        std::thread::sleep(Duration::from_millis(15));
+        scheduler.tick();
+
+        assert_eq!(scheduler.get_stats("fail_job"), Some((1, 0)));
+    }
+});

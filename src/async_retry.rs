@@ -33,3 +33,45 @@ where
         }
     }
 }
+
+ftest::test!(async_retry_tests, {
+    test_retry_success.tokio {
+        let mut attempts = 0;
+        let result = async_retry(
+            || {
+                attempts += 1;
+                async move {
+                    if attempts < 3 {
+                        Err("error")
+                    } else {
+                        Ok(42)
+                    }
+                }
+            },
+            3,
+            Duration::from_millis(5),
+            false,
+        )
+        .await;
+
+        assert_eq!(result, Ok(42));
+        assert_eq!(attempts, 3);
+    }
+
+    test_retry_max_attempts_exceeded.tokio {
+        let mut attempts = 0;
+        let result: Result<(), &str> = async_retry(
+            || {
+                attempts += 1;
+                async move { Err("persistent error") }
+            },
+            2,
+            Duration::from_millis(5),
+            true,
+        )
+        .await;
+
+        assert_eq!(result, Err("persistent error"));
+        assert_eq!(attempts, 3);
+    }
+});

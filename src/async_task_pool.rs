@@ -97,3 +97,32 @@ impl Drop for AsyncTaskPool {
         self.token.cancel();
     }
 }
+
+
+ftest::test!(async_task_pool_tests, {
+    test_pool_execution.tokio {
+        let pool = AsyncTaskPool::new(2, 5, None);
+        let counter = std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));
+
+        for _ in 0..3 {
+            let c = counter.clone();
+            let res = pool.execute(move || {
+                c.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            }).await;
+            assert!(res.is_ok());
+        }
+
+        tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+
+        pool.shutdown_gracefully().await;
+        assert_eq!(counter.load(std::sync::atomic::Ordering::SeqCst), 3);
+    }
+
+    test_pool_cancel.tokio {
+        let pool = AsyncTaskPool::new(1, 2, None);
+        pool.cancel();
+
+        let res = pool.execute(|| {}).await;
+        assert!(res.is_err());
+    }
+});

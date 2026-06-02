@@ -91,3 +91,70 @@ fn main() {
 }
 
 */
+
+ftest::test!(state_event_action_tests, {
+    
+    #[derive(Clone, Copy, Debug, PartialEq)]
+    pub enum ConnState {
+        Disconnected,
+        Connecting,
+        Connected,
+        Error,
+    }
+    
+    pub enum ConnEvent {
+        Connect,
+        Success,
+        Fail(u16),
+        Terminate,
+    }
+    
+    state_event_action!(ConnHandler, ConnState, ConnEvent, {
+        ConnState::Disconnected, ConnEvent::Connect => ConnState::Connecting, {
+            let _ = "Transitioning: Disconnected -> Connecting";
+        },
+        ConnState::Connecting, ConnEvent::Success => ConnState::Connected, {
+            let _ = "Transitioning: Connecting -> Connected";
+        },
+        ConnState::Connecting, ConnEvent::Fail(_code) => ConnState::Error, {
+            let _ = "Error occurred";
+        },
+        ConnState::Connected, ConnEvent::Terminate => ConnState::Disconnected, {
+            let _ = "Transitioning: Connected -> Disconnected";
+        },
+        ConnState::Error, ConnEvent::Connect => ConnState::Connecting
+    });
+    
+
+    test_state_initial_and_dispatch_success {
+        let mut fsm = StateEventAction::new(ConnState::Disconnected);
+        assert_eq!(fsm.current, ConnState::Disconnected);
+
+        fsm.dispatch(ConnEvent::Connect, ConnHandler::transition);
+        assert_eq!(fsm.current, ConnState::Connecting);
+
+        fsm.dispatch(ConnEvent::Success, ConnHandler::transition);
+        assert_eq!(fsm.current, ConnState::Connected);
+    }
+
+    test_state_dispatch_fail_to_error {
+        let mut fsm = StateEventAction::new(ConnState::Connecting);
+
+        fsm.dispatch(ConnEvent::Fail(500), ConnHandler::transition);
+        assert_eq!(fsm.current, ConnState::Error);
+    }
+
+    test_state_invalid_transition_remains_unchanged {
+        let mut fsm = StateEventAction::new(ConnState::Disconnected);
+
+        fsm.dispatch(ConnEvent::Success, ConnHandler::transition);
+        assert_eq!(fsm.current, ConnState::Disconnected);
+    }
+
+    test_state_terminate_connection {
+        let mut fsm = StateEventAction::new(ConnState::Connected);
+
+        fsm.dispatch(ConnEvent::Terminate, ConnHandler::transition);
+        assert_eq!(fsm.current, ConnState::Disconnected);
+    }
+});

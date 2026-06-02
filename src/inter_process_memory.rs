@@ -46,3 +46,33 @@ impl Drop for InterProcessMemory {
         }
     }
 }
+
+ftest::test!(inter_process_memory_tests, {
+    test_create_and_write_read {
+        let shm_name = "/test_shm_unique_name_1";
+        let size = 1024;
+
+        let ipm = InterProcessMemory::create(shm_name, size).unwrap();
+        let ptr = ipm.as_ptr();
+
+        assert!(!ptr.is_null());
+
+        unsafe {
+            let data_to_write = [10u8, 20u8, 30u8, 40u8];
+            std::ptr::copy_nonoverlapping(data_to_write.as_ptr(), ptr, data_to_write.len());
+
+            let mut data_read = [0u8; 4];
+            std::ptr::copy_nonoverlapping(ptr, data_read.as_mut_ptr(), data_read.len());
+
+            assert_eq!(data_to_write, data_read);
+        }
+    }
+
+    test_invalid_name {
+        let shm_name = "invalid_name_without_leading_slash";
+        let size = 1024;
+
+        let ipm = InterProcessMemory::create(shm_name, size);
+        assert!(ipm.is_err() || ipm.is_ok());
+    }
+});

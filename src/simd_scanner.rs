@@ -98,3 +98,46 @@ impl SimdScanner {
         haystack[i..].iter().position(|&b| b == needle).map(|pos| i + pos)
     }
 }
+
+ftest::test!(simd_scanner_tests, {
+    test_scan_not_found {
+        let haystack = vec![1u8, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        let result = SimdScanner::find_byte(&haystack, 99);
+        assert!(result.is_none());
+    }
+
+    test_scan_small_buffer {
+        let haystack = vec![1u8, 2, 3, 4, 5, 42, 6, 7];
+        let result = SimdScanner::find_byte(&haystack, 42);
+        assert_eq!(result, Some(5));
+    }
+
+    test_scan_large_buffer_exact_simd_boundary {
+        let mut haystack = vec![0u8; 32];
+        haystack[31] = 42;
+        let result = SimdScanner::find_byte(&haystack, 42);
+        assert_eq!(result, Some(31));
+    }
+
+    test_scan_large_buffer_first_element {
+        let mut haystack = vec![0u8; 100];
+        haystack[0] = 42;
+        let result = SimdScanner::find_byte(&haystack, 42);
+        assert_eq!(result, Some(0));
+    }
+
+    test_scan_large_buffer_tail_fallback {
+        let mut haystack = vec![0u8; 40];
+        haystack[38] = 42;
+        let result = SimdScanner::find_byte(&haystack, 42);
+        assert_eq!(result, Some(38));
+    }
+
+    test_scan_multiple_matches {
+        let mut haystack = vec![0u8; 64];
+        haystack[10] = 42;
+        haystack[20] = 42;
+        let result = SimdScanner::find_byte(&haystack, 42);
+        assert_eq!(result, Some(10));
+    }
+});

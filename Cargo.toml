@@ -9,8 +9,12 @@ tokio = { version = "*", features = ["sync", "time", "fs", "rt", "macros", "sign
 tokio-util = { version = "0.7.18", optional = true }
 futures = "*"
 paste = "*"
+ftest = { git = "https://github.com/fuji-184/FTest.git", features = ["tokio"] }
+
+#ftest = { path = "./FTest", features = ["tokio"] }
 
 [features]
 default = []
 async_cross_thread = ["dep:tokio", "dep:tokio-util"]
 libc = ["dep:libc"]
+dev = ["async_cross_thread", "libc"]

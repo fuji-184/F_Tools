@@ -1,5 +1,4 @@
 use std::marker::PhantomData;
-use std::ops::Deref;
 
 pub struct RelativePointer<T> {
     offset: u64,
@@ -26,3 +25,46 @@ impl<T> RelativePointer<T> {
         (base_addr + self.offset as usize) as *mut T
     }
 }
+
+ftest::test!(relative_pointer_tests, {
+    test_null_pointer {
+        let rel_ptr = RelativePointer::<i32>::null();
+        let base_addr = 0x1000;
+
+        unsafe {
+            assert!(rel_ptr.as_ptr(base_addr).is_null());
+            assert!(rel_ptr.as_mut_ptr(base_addr).is_null());
+        }
+    }
+
+    test_from_ptr_and_deref {
+        let value = 42i32;
+        let base_buffer = vec![0u8; 128];
+        let base_addr = base_buffer.as_ptr() as usize;
+
+        let target_ptr = &value as *const i32;
+        let rel_ptr = RelativePointer::from_ptr(target_ptr, base_addr);
+
+        unsafe {
+            let resolved_ptr = rel_ptr.as_ptr(base_addr);
+            assert_eq!(resolved_ptr, target_ptr);
+            assert_eq!(*resolved_ptr, 42);
+        }
+    }
+
+    test_mut_ptr_modification {
+        let mut value = 100i32;
+        let base_addr = 0x2000;
+
+        let target_ptr = &mut value as *mut i32;
+        let rel_ptr = RelativePointer::from_ptr(target_ptr, base_addr);
+
+        unsafe {
+            let resolved_mut_ptr = rel_ptr.as_mut_ptr(base_addr);
+            assert_eq!(resolved_mut_ptr, target_ptr);
+            *resolved_mut_ptr = 200;
+        }
+
+        assert_eq!(value, 200);
+    }
+});

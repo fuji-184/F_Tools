@@ -30,7 +30,7 @@ impl<T, F: for<'a> Yokeable<'a>> SelfRef<T, F> {
         std::mem::forget(dep);
 
         Self {
-            owner: owner,
+            owner,
             refs: unsafe { NonNull::new_unchecked(Box::into_raw(Box::new(dep_static))) },
             _marker: PhantomData,
         }
@@ -90,23 +90,25 @@ macro_rules! self_ref {
         $(#[$main_meta:meta])*
         $vis:vis struct $struct_name:ident {
             $( $field_vis:vis $field_name:ident : $field_type:ty ),* $(,)?
-            => 
-            $(#[$ref_meta:meta])*
-            { $( $ref_field_vis:vis $ref_field:ident : $ref_type:ty ),* $(,)? }
         }
+        => 
+        $(#[$ref_meta:meta])*
+        { $( $ref_field_vis:vis $ref_field:ident : $ref_type:ty ),* $(,)? }
     ) => {
         $(#[$main_meta])*
+        #[derive(Debug)]
         $vis struct $struct_name {
             $( $field_vis $field_name: $field_type, )*
         }
 
         paste::paste! {
             $(#[$ref_meta])*
+            #[derive(Debug)]
             $vis struct [<$struct_name Refs>]<'a> {
                 $( $ref_field_vis $ref_field: $ref_type, )*
             }
 
-            impl<'a> Yokeable<'a> for $struct_name {
+            impl<'a> $crate::Yokeable<'a> for $struct_name {
                 type Output = [<$struct_name Refs>]<'a>;
             }
         }
@@ -115,55 +117,33 @@ macro_rules! self_ref {
 
 #[macro_export]
 macro_rules! declare_self_ref {
-
     (
-
         $struct_name:ident {
-
             $( $field:ident : $val:expr ),* $(,)?
-
-            => { $( $ref_field:ident : &$source:ident ),* $(,)? }
-
         }
-
+        => 
+        { $( $ref_field:ident : &$source:ident ),* $(,)? }
     ) => {
-
         paste::paste! {
-
-            SelfRef::<$struct_name, $struct_name>::new(
-
+            $crate::SelfRef::<$struct_name, $struct_name>::new(
                 $struct_name {
-
-                    $( $field : $val ),*
-
+                    $( $field : $val, )*
                 }, 
-
                 |d| {
-
                     [<$struct_name Refs>] {
-
-                        $( $ref_field : &d.$source ),*
-
+                        $( $ref_field : &d.$source, )*
                     }
-
                 }
-
             )
-
         }
-
     };
-
 }
 
 #[macro_export]
 macro_rules! update_self_ref_field {
-
-    ($sref:ident, $owner_f:ident => [ $( $ref_f:ident : $t:ty ),* ], $val:expr) => {
+    ($sref:ident, $owner_f:ident => [ $( $ref_f:ident : $t:ty ),* $(,)? ], $val:expr) => {
         $sref.update_field(|owner, refs| {
-
             owner.$owner_f = $val;
-            
             unsafe {
                 $(
                     let coerced: $t = owner.$owner_f.as_ref();
@@ -174,9 +154,58 @@ macro_rules! update_self_ref_field {
     };
 
     ($sref:ident, $owner_f:ident => $ref_f:ident : $t:ty, $val:expr) => {
-        update_field!($sref, $owner_f => [$ref_f : $t], $val);
+        $crate::update_self_ref_field!($sref, $owner_f => [$ref_f : $t], $val);
     };
 }
 
 
+ftest::test!(self_ref_tests, {
+ 
+    self_ref! {
+        pub struct TestData {
+            pub value: String,
+        }
+        =>
+        {
+            pub value_ref: &'a str,
+        }
+    }
 
+    test_create_and_read_self_ref {
+        let sref = declare_self_ref!(TestData {
+            value: "hello".to_string(),
+        } => {
+            value_ref: &value,
+        });
+
+        assert_eq!(sref.get_owner().value, "hello");
+        assert_eq!(sref.get_refs().value_ref, "hello");
+    }
+
+    test_update_field_self_ref {
+        let mut sref = declare_self_ref!(TestData {
+            value: "initial".to_string(),
+        } => {
+            value_ref: &value,
+        });
+
+        update_self_ref_field!(sref, value => [value_ref: &str], "updated".to_string());
+
+        assert_eq!(sref.get_owner().value, "updated");
+        assert_eq!(sref.get_refs().value_ref, "updated");
+    }
+
+    test_debug_formatting {
+        let sref = declare_self_ref!(TestData {
+            value: "debug".to_string(),
+        } => {
+            value_ref: &value,
+        });
+
+        let debug_str = format!("{:?}", sref);
+        assert!(debug_str.contains("SelfRef"));
+        assert!(debug_str.contains("owner"));
+        assert!(debug_str.contains("refs"));
+        assert!(debug_str.contains("debug"));
+    }
+});

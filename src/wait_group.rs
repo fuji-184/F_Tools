@@ -99,6 +99,7 @@ impl FutexWaitGroup {
     }
 }
 
+#[cfg(feature = "libc")]
 impl Clone for FutexWaitGroup {
     fn clone(&self) -> Self {
         Self {
@@ -106,3 +107,67 @@ impl Clone for FutexWaitGroup {
         }
     }
 }
+
+ftest::test!(wait_group_tests, {
+    test_wait_group_no_tasks {
+        let wg = WaitGroup::new();
+        wg.wait();
+    }
+
+    test_wait_group_concurrent_execution.tokio {
+        let wg = WaitGroup::new();
+        let counter = Arc::new(AtomicUsize::new(0));
+
+        for _ in 0..5 {
+            wg.add(1);
+            let wg_clone = wg.clone();
+            let counter_clone = Arc::clone(&counter);
+            
+            tokio::spawn(async move {
+                counter_clone.fetch_add(1, Ordering::SeqCst);
+                wg_clone.done();
+            });
+        }
+
+        let wg_res = wg.clone();
+        tokio::task::spawn_blocking(move || {
+            wg_res.wait();
+        })
+        .await
+        .unwrap();
+        
+        assert_eq!(counter.load(Ordering::SeqCst), 5);
+    }
+});
+
+#[cfg(feature = "libc")]
+ftest::test!(futex_wait_group_tests, {
+    test_futex_wait_group_no_tasks {
+        let wg = FutexWaitGroup::new();
+        wg.wait();
+    }
+
+    test_futex_wait_group_concurrent_execution {
+        let wg = FutexWaitGroup::new();
+        let counter = Arc::new(AtomicUsize::new(0));
+        let mut handles = vec![];
+
+        for _ in 0..5 {
+            wg.add(1);
+            let wg_clone = wg.clone();
+            let counter_clone = Arc::clone(&counter);
+
+            handles.push(std::thread::spawn(move || {
+                counter_clone.fetch_add(1, Ordering::SeqCst);
+                wg_clone.done();
+            }));
+        }
+
+        wg.wait();
+        assert_eq!(counter.load(Ordering::SeqCst), 5);
+
+        for handle in handles {
+            let _ = handle.join();
+        }
+    }
+});

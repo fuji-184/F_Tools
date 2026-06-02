@@ -47,3 +47,29 @@ impl AsyncLeakyBucket {
         }
     }
 }
+
+ftest::test!(async_leaky_bucket_tests, {
+    test_immediate_acquires.tokio {
+        let bucket = AsyncLeakyBucket::new(3.0, 1.0);
+
+        let start = Instant::now();
+        bucket.acquire().await;
+        bucket.acquire().await;
+        bucket.acquire().await;
+        
+        assert!(start.elapsed() < Duration::from_millis(10));
+    }
+
+    test_rate_limiting_and_refill.tokio {
+        let bucket = AsyncLeakyBucket::new(1.0, 10.0);
+
+        bucket.acquire().await;
+
+        let start = Instant::now();
+        bucket.acquire().await;
+        let elapsed = start.elapsed();
+
+        assert!(elapsed >= Duration::from_millis(90));
+        assert!(elapsed < Duration::from_millis(150));
+    }
+});

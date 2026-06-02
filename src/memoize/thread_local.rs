@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+
 use std::collections::HashMap;
 use std::hash::Hash;
 
@@ -43,6 +43,7 @@ where
 
 #[macro_export]
 macro_rules! thread_local_memo {
+    // name, size, logic, parameter type, return type
     ($name:ident, $max_size:expr, $logic:expr, $t:ty, $u:ty) => {
         thread_local! {
             static $name: std::cell::RefCell<$crate::memoize::ThreadLocalMemoize<$t, $u, fn($t) -> $u>> = 
@@ -50,3 +51,26 @@ macro_rules! thread_local_memo {
         }
     };
 }
+
+ftest::test!(thread_local_memoize_test, {
+  
+  test_memoize {
+    thread_local_memo!(M, 10, |(a, b): (i32, i32)| {
+      a * b
+    }, (i32, i32), i32);
+    
+    let a = [
+          (2, 3, 6),
+          (8, 2, 16),
+          (9, 9, 81)
+      ];
+      
+      for (a, b, c) in a {
+          let res = M.with(|m| m.borrow_mut().call(
+            (a, b)
+          ));
+          assert_eq!(res, c);
+      }
+  }
+  
+});

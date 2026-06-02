@@ -1,6 +1,5 @@
 use std::time::Duration;
 use tokio::sync::mpsc;
-use tokio::time::Instant;
 
 pub struct AsyncDebounce<T> {
     tx: mpsc::UnboundedSender<T>,
@@ -50,3 +49,60 @@ impl<T: Send + 'static> AsyncDebounce<T> {
         let _ = self.tx.send(item);
     }
 }
+
+ftest::test!(async_debounce_tests, {
+    test_debounce_and_distinct.tokio {
+        let (tx, mut rx) = mpsc::unbounded_channel::<i32>();
+        let debounce = AsyncDebounce::new(
+            Duration::from_millis(50),
+            move |item| {
+                let tx = tx.clone();
+                async move {
+                    let _ = tx.send(item);
+                }
+            },
+            true,
+        );
+
+        debounce.send(1);
+        tokio::time::sleep(Duration::from_millis(10)).await;
+        debounce.send(2);
+        tokio::time::sleep(Duration::from_millis(10)).await;
+        debounce.send(3);
+
+        tokio::time::sleep(Duration::from_millis(80)).await;
+        assert_eq!(rx.try_recv().unwrap(), 3);
+        assert!(rx.try_recv().is_err());
+
+        debounce.send(3);
+        tokio::time::sleep(Duration::from_millis(80)).await;
+        assert!(rx.try_recv().is_err());
+
+        debounce.send(4);
+        tokio::time::sleep(Duration::from_millis(80)).await;
+        assert_eq!(rx.try_recv().unwrap(), 4);
+        assert!(rx.try_recv().is_err());
+    }
+
+    test_debounce_without_distinct.tokio {
+        let (tx, mut rx) = mpsc::unbounded_channel::<i32>();
+        let debounce = AsyncDebounce::new(
+            Duration::from_millis(30),
+            move |item| {
+                let tx = tx.clone();
+                async move {
+                    let _ = tx.send(item);
+                }
+            },
+            false,
+        );
+
+        debounce.send(42);
+        tokio::time::sleep(Duration::from_millis(50)).await;
+        assert_eq!(rx.try_recv().unwrap(), 42);
+
+        debounce.send(42);
+        tokio::time::sleep(Duration::from_millis(50)).await;
+        assert_eq!(rx.try_recv().unwrap(), 42);
+    }
+});
