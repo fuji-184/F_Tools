@@ -2,9 +2,9 @@
 /*
 Asynchronous retry mechanism with optional backoff scaling.
 
-This function automatically re-evaluates an operation producing a Result future upon failure.
+This function automatically re evaluates an operation producing a Result future upon failure.
 It repeats execution up to a specified maximum attempt threshold before escalating the final 
-error. Between retries, it yields control non-blockingly using either a static sleep 
+error. Between retries, it yields control non blockingly using either a static sleep 
 duration or an increased backoff delay proportional to the current attempt count.
 */
 

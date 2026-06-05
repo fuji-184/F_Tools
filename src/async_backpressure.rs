@@ -1,6 +1,6 @@
 
 /*
-Asynchronous backpressure control using semaphore-based concurrency limiting.
+Asynchronous backpressure control using semaphore based concurrency limiting.
 
 This module provides a mechanism to throttle the execution of asynchronous futures.
 By wrapping task orchestration inside a semaphore pool, it ensures that the system stabilizes resource consumption and prevents resource exhaustion under heavy loads by capping the maximum number of overlapping active operations.

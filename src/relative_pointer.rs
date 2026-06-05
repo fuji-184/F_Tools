@@ -49,13 +49,10 @@ ftest::test!(relative_pointer_tests, {
     }
 
     test_from_ptr_and_deref {
-        let value = 42i32;
-        let base_buffer = vec![0u8; 128];
+        let base_buffer = vec![0i32, 42i32, 0];
         let base_addr = base_buffer.as_ptr() as usize;
-
-        let target_ptr = &value as *const i32;
+        let target_ptr = &base_buffer[1] as *const i32;
         let rel_ptr = RelativePointer::from_ptr(target_ptr, base_addr);
-
         unsafe {
             let resolved_ptr = rel_ptr.as_ptr(base_addr);
             assert_eq!(resolved_ptr, target_ptr);

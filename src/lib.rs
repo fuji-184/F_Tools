@@ -172,3 +172,6 @@ pub use global_async_scope::*;
 
 mod self_reference;
 pub use self_reference::*;
+
+mod syntax;
+pub use syntax::*;

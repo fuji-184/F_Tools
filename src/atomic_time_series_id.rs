@@ -1,9 +1,10 @@
 
 /*
-Thread-safe, lock-free unique identifier generator inspired by the Snowflake layout.
+Thread-safe, lock-
+ free unique identifier generator inspired by the Snowflake layout.
 
-This structure aggregates a 42-bit millisecond timestamp, a 10-bit worker identifier, 
-and a 12-bit rolling sequence counter into a single atomic 64-bit value. It relies on a 
+This structure aggregates a 42 bit millisecond timestamp, a 10-bit worker identifier, 
+and a 12-bit rolling sequence counter into a single atomic 64 bit value. It relies on a 
 compare-and-swap loop to guarantee strict chronological monotonicity and thread isolation 
 without thread blocking, mitigating system clock skew or high-frequency sequence overflows.
 */

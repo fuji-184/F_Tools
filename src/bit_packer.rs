@@ -3,10 +3,10 @@
 Data packing and bit utility for efficient storage and serialization.
 
 This structure allows to combine two smaller values into a single, larger data type, 
-and vice versa, using zero-cost bitwise arithmetic. It is primarily used to optimize 
+and vice versa, using zero cost bitwise arithmetic. It is primarily used to optimize 
 data structures—such as packing multiple small identifiers into a single 64-bit key for 
-hash tables, compressing status flags, or minimizing memory footprint in high-frequency 
-data processing pipelines—by reducing the number of variables to track and streamlining 
+hash tables, compressing status flags, or minimizing memory footprint in high frequency 
+data processing pipelines by reducing the number of variables to track and streamlining 
 cache-friendly memory access patterns.
 */
 

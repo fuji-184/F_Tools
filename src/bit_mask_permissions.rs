@@ -4,7 +4,7 @@ High-performance bitmask utility for zero-cost permission and privilege manageme
 
 This module provides an inlineable API to perform granular bitwise mutations and checks 
 over unsigned 64-bit flag integers. It supports typical authorization workflows including 
-granting, revoking, toggling, and multi-flag intersecting (all-or-any matching) without 
+granting, revoking, toggling, and multi-flag intersecting (all or any matching) without 
 runtime allocations, enforcing compact and cache-friendly operational access control.
 */
 
