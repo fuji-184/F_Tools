@@ -41,7 +41,7 @@ impl<T, E> IntoOption for Result<T, E> {
     }
 }
 
-// Optional chaining via `?.field` syntax, similar to JavaScript's `?.` operator.
+// Optional chaining via `?.field` syntax, similar to the built in `?.` operator.
 // Traverses a chain of fields that return Option or Result, short-circuiting to None
 // the moment any field in the chain is absent or failed. Eliminates nested match/if-let chains.
 #[macro_export]
