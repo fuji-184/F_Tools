@@ -1,5 +1,4 @@
 
-#![feature(test)]
 
 pub use paste;
 
