@@ -163,7 +163,7 @@ macro_rules! __simd_dsl_munch {
 }
 
 #[macro_export]
-macro_rules! looping {
+macro_rules! data_loop {
     ($unroll:tt unroll * $chunk_size:tt chunk for $($tail:tt)*) => {
         __simd_dsl_munch!(@slices $unroll, $chunk_size, [], $($tail)*);
     };
